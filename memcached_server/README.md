@@ -1,9 +1,19 @@
-## Memcached  ## 
-is a high performance, distributed memory object caching system, generic in 
-nature, but originally intended for use in speeding up dynamic web applications by alleviating database load.
+## Build Your Own Memcached Server
 
-Memcached supports a client-server architecture with each client aware of all of the servers, but the servers are unaware of each other and do not communicate.
+This challenge entails building your own Memcached server, a high-performance, distributed memory object caching system. Memcached is designed to speed up dynamic web applications by alleviating database load.
 
-If a client wishes to set or read the value corresponding to a certain key, the client's library first computes a hash of the key to determine which server to use. This provides a simple form of sharding and creates a highly-scalable shared-nothing architecture across the Memcached servers.
+### Key Features of Memcached:
 
-When the server receives a request it computes a second hash of the key to determine where to store/read the corresponding value. Values are stored in RAM; if a server runs out of RAM, it discards the oldest values. Memcached is as a transitory cache; client cannot assume that the data in still in cache when they need it.
+- **In-Memory Key-Value Store:** Memcached stores small chunks of arbitrary data in memory, retrieved from backend systems with higher latency.
+  
+- **Simplicity and Power:** Despite its simplicity, Memcached is a powerful tool that promotes quick deployment, ease of development, and solves many problems faced by large data caches.
+
+- **Simple API:** Memcached provides a relatively simple API that is available for most popular programming languages, making it accessible for developers across various platforms.
+
+### Background:
+
+- **Origin:** Memcached was originally developed by Brad Fitzpatrick for LiveJournal in 2003.
+  
+- **Programming Languages:** Initially written in Perl, Memcached was later ported to C, enhancing its performance and reliability.
+
+This challenge offers an opportunity to delve into the architecture and functionality of Memcached, providing hands-on experience in building a distributed memory caching system.
