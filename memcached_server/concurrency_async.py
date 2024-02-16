@@ -1,5 +1,6 @@
 import asyncio
 import argparse
+import uuid
 
 class MemcachedServer:
     def __init__(self, port):
@@ -50,6 +51,8 @@ class MemcachedServer:
             await self.handle_append(command_parts, reader, writer)
         elif command == 'PREPEND':
             await self.handle_prepend(command_parts, reader, writer)
+        elif command == 'CAS':
+            await self.handle_cas(command_parts, reader, writer)
         else:
             writer.write(b'ERROR\r\n')
 
@@ -58,22 +61,49 @@ class MemcachedServer:
         try:
             byte_count = int(command_parts[4])
             value = await reader.readexactly(byte_count)
-            print('Set Value %s' % value)
-            self.cache[key] = value
-            writer.write(b'STORED\r\n')
+            
+            unique_id = str(uuid.uuid4())
+            self.cache[key] = {'value': value, 'cas_unique': unique_id}
+            
+            # Respond with STORED and the unique identifier
+            writer.write(f'STORED {unique_id}\r\n'.encode())
         except (ValueError, asyncio.exceptions.IncompleteReadError):
             writer.write(b'CLIENT_ERROR\r\n')
 
 
     async def handle_get(self, command_parts, writer):
         key = command_parts[1]
-        value = self.cache.get(key, b'')
-        if value:
-            print('value %s' % value)
+        item = self.cache.get(key)
+        if item:
+            value = item['value']
+            cas_unique = item['cas_unique']
             value_str = value.decode()  # Decode bytes to string
-            writer.write(f'VALUE {key} 0 {len(value_str)}\r\n{value_str}\r\nEND\r\n'.encode())
+            writer.write(f'VALUE {key} 0 {len(value_str)} {cas_unique}\r\n{value_str}\r\nEND\r\n'.encode())
         else:
             writer.write(b'END\r\n')
+
+
+
+    async def handle_cas(self, command_parts, reader, writer):
+        key = command_parts[1]
+        if key not in self.cache:
+            writer.write(b'NOT_FOUND\r\n')
+            return
+
+        cas_unique = command_parts[-1]
+        if cas_unique != self.cache[key]['cas_unique']:
+            writer.write(b'EXISTS\r\n')
+            return
+
+        try:
+            byte_count = int(command_parts[4])
+            value = await reader.readexactly(byte_count)
+            self.cache[key] = {'value': value, 'cas_unique': cas_unique}
+            writer.write(b'STORED\r\n')
+        except (ValueError, asyncio.exceptions.IncompleteReadError):
+            writer.write(b'CLIENT_ERROR\r\n')
+
+
 
     async def handle_add(self, command_parts, reader, writer):
         key = command_parts[1]
