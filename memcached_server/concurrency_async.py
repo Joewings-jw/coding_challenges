@@ -46,6 +46,10 @@ class MemcachedServer:
             await self.handle_add(command_parts, reader, writer)
         elif command == 'REPLACE':
             await self.handle_replace(command_parts, reader, writer)
+        elif command == 'APPEND':
+            await self.handle_append(command_parts, reader, writer)
+        elif command == 'PREPEND':
+            await self.handle_prepend(command_parts, reader, writer)
         else:
             writer.write(b'ERROR\r\n')
 
@@ -84,6 +88,36 @@ class MemcachedServer:
             await self.handle_set(command_parts, reader, writer)
         else:
             writer.write(b'NOT_STORED\r\n')
+
+
+    async def handle_append(self, command_parts, reader, writer):
+        key = command_parts[1]
+        if key not in self.cache:
+            writer.write(b'NOT_STORED\r\n')
+            return
+
+        try:
+            byte_count = int(command_parts[4])
+            value = await reader.readexactly(byte_count)
+            self.cache[key] += value
+            writer.write(b'STORED\r\n')
+        except (ValueError, asyncio.exceptions.IncompleteReadError):
+            writer.write(b'CLIENT_ERROR\r\n')
+
+    async def handle_prepend(self, command_parts, reader, writer):
+        key = command_parts[1]
+        if key not in self.cache:
+            writer.write(b'NOT_STORED\r\n')
+            return
+
+        try:
+            byte_count = int(command_parts[4])
+            value = await reader.readexactly(byte_count)
+            self.cache[key] = value + self.cache[key]
+            writer.write(b'STORED\r\n')
+        except (ValueError, asyncio.exceptions.IncompleteReadError):
+            writer.write(b'CLIENT_ERROR\r\n')
+
 
 
 if __name__ == '__main__':
