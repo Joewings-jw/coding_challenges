@@ -1,3 +1,4 @@
+import threading
 import argparse
 import socket
 
@@ -6,16 +7,17 @@ class MemcachedServer:
         self.port = port
         self.cache = {}
 
-    def start(self):
-        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        server_socket.bind(('127.0.0.1', self.port))
-        server_socket.listen(5)
-        print(f'Memcached server started on port {self.port}')
 
-        while True:
-            client_socket, client_address = server_socket.accept()
-            print(f'Connection from {client_address}')
-            self.handle_client(client_socket)
+    def start(self):
+            server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            server_socket.bind(('127.0.0.1', self.port))
+            server_socket.listen(5)
+            print(f'Memcached server started on port {self.port}')
+
+            while True:
+                client_socket, client_address = server_socket.accept()
+                print(f'Connection from {client_address}')
+                self.handle_client(client_socket)
 
     def handle_client(self, client_socket):
         while True:
@@ -43,10 +45,24 @@ class MemcachedServer:
                 client_socket.sendall(b'ERROR\r\n')
         client_socket.close()
 
+    def start_with_threads(self):
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server_socket.bind(('127.0.0.1', self.port))
+        server_socket.listen(5)
+        print(f'Memcached server started on port {self.port}')
+
+        while True:
+            client_socket, client_address = server_socket.accept()
+            print(f'Connection from {client_address}')
+
+            # Start a new thread to handle the client
+            client_thread = threading.Thread(target=self.handle_client, args=(client_socket,))
+            client_thread.start()
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Memcached Server')
     parser.add_argument('-p', '--port', type=int, default=11211, help='Port number (default: 11211)')
     args = parser.parse_args()
 
     server = MemcachedServer(args.port)
-    server.start()
+    server.start_with_threads()
