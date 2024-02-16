@@ -3,8 +3,9 @@ import argparse
 import uuid
 
 class MemcachedServer:
-    def __init__(self, port):
+    def __init__(self, port, max_cache_size=None):
         self.port = port
+        self.max_cache_size = max_cache_size
         self.cache = {}
 
     async def start(self):
@@ -61,6 +62,11 @@ class MemcachedServer:
             writer.write(b'ERROR\r\n')
 
     async def handle_set(self, command_parts, reader, writer):
+        if self.max_cache_size is not None and len(self.cache) >= self.max_cache_size:
+            writer.write(b'SERVER_ERROR Cache size limit reached\r\n')
+            return
+        
+
         key = command_parts[1]
         try:
             byte_count = int(command_parts[4])
@@ -188,7 +194,8 @@ class MemcachedServer:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Memcached Server')
     parser.add_argument('-p', '--port', type=int, default=11211, help='Port number (default: 11211)')
+    parser.add_argument('-s', '--max-cache-size', type=int, default=None, help='Maximum cache size (default: unlimited)')
     args = parser.parse_args()
 
-    server = MemcachedServer(args.port)
+    server = MemcachedServer(args.port, max_cache_size=args.max_cache_size)
     asyncio.run(server.start())
