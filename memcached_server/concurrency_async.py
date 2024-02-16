@@ -42,6 +42,12 @@ class MemcachedServer:
             await self.handle_set(command_parts, reader, writer)
         elif command == 'GET':
             await self.handle_get(command_parts, writer)
+        elif command == 'ADD':
+            await self.handle_add(command_parts, reader, writer)
+        elif command == 'REPLACE':
+            await self.handle_replace(command_parts, reader, writer)
+        else:
+            writer.write(b'ERROR\r\n')
 
     async def handle_set(self, command_parts, reader, writer):
         key = command_parts[1]
@@ -64,6 +70,20 @@ class MemcachedServer:
             writer.write(f'VALUE {key} 0 {len(value_str)}\r\n{value_str}\r\nEND\r\n'.encode())
         else:
             writer.write(b'END\r\n')
+
+    async def handle_add(self, command_parts, reader, writer):
+        key = command_parts[1]
+        if key in self.cache:
+            writer.write(b'NOT_STORED\r\n')
+        else:
+            await self.handle_set(command_parts, reader, writer)
+
+    async def handle_replace(self, command_parts,reader, writer):
+        key = command_parts[1]
+        if key in self.cache:
+            await self.handle_set(command_parts, reader, writer)
+        else:
+            writer.write(b'NOT_STORED\r\n')
 
 
 if __name__ == '__main__':
