@@ -1,19 +1,48 @@
 ## Build Your Own Redis Server
 
-This challenge involves building your own Redis server, an in-memory data structure server known for its versatility and performance.
+Redis is an open-source, in-memory data structure store used as a database, cache, and message broker. It supports various data structures such as strings, hashes, lists, sets, sorted sets with range queries, bitmaps, hyperloglogs, geospatial indexes with radius queries, and streams. This challenge involves building your own Redis server, which will offer similar functionalities as the original Redis.
 
 ### Key Features of Redis:
 
-- **In-Memory Data Structure Store:** Redis supports storing a wide range of data structures, including strings, hashes, lists, sets, sorted sets, and more.
+- **In-Memory Data Store:** Redis primarily stores data in memory, making it extremely fast for data retrieval and storage operations.
 
-- **Versatility:** Redis is renowned for its versatility, making it suitable for a variety of use cases ranging from caching to messaging and beyond.
+- **Data Structures:** Redis supports a wide range of data structures, allowing for versatile data storage and manipulation.
 
-- **History and Evolution:** Originally intended as a Remote Dictionary Server (hence the name "Redis"), the project was initiated by Salvatore Sanfilippo. The first version, written in just over 300 lines of TCL, showcased the project's humble beginnings.
+- **Persistence:** Redis offers options for data persistence, enabling data to be stored on disk for durability.
 
 ### Background:
 
-- **Evolution:** Since its inception in 2009, Redis has evolved significantly. It has been ported to C, optimizing its performance and reliability, and released as open source.
+- **Origin:** Redis was created by Salvatore Sanfilippo, commonly known as antirez, in 2009.
 
-- **Popularity:** Redis has emerged as one of the most widely used key-value and NoSQL databases, owing to its robust features and performance.
+- **Language:** Redis is implemented in ANSI C, providing high performance and portability across different systems.
 
-This challenge offers an exciting opportunity to explore the inner workings of Redis and gain hands-on experience in building a powerful in-memory data store.
+This challenge provides an opportunity to explore the architecture and functionalities of Redis, allowing you to gain practical experience in building a distributed, in-memory data store.
+
+### Components of the Redis Server:
+
+1. **Network Layer:** Handles incoming client connections and communication protocols.
+   
+2. **Command Processing:** Parses client commands and executes corresponding operations on the data store.
+   
+3. **Data Structures:** Implements various data structures such as strings, lists, sets, hashes, sorted sets, bitmaps, and hyperloglogs.
+   
+4. **Persistence:** Offers mechanisms for data persistence, including snapshotting and append-only file (AOF) persistence.
+
+### Redis Commands:
+
+- **GET key:** Get the value stored at the specified key.
+  
+- **SET key value [EX seconds] [PX milliseconds] [NX|XX]:** Set the value of a key with an optional expiration time and condition.
+  
+- **DEL key [key ...]:** Delete one or more keys.
+  
+- **INCR key:** Increment the integer value of a key by one.
+  
+- **DECR key:** Decrement the integer value of a key by one.
+  
+- **LPUSH key value [value ...]:** Prepend one or multiple values to a list.
+  
+- **RPUSH key value [value ...]:** Append one or multiple values to a list.
+
+
+
