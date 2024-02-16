@@ -53,6 +53,8 @@ class MemcachedServer:
             await self.handle_prepend(command_parts, reader, writer)
         elif command == 'CAS':
             await self.handle_cas(command_parts, reader, writer)
+        elif command == 'INC':
+            await self.handle_increment(command_parts, writer)
         else:
             writer.write(b'ERROR\r\n')
 
@@ -147,6 +149,26 @@ class MemcachedServer:
             writer.write(b'STORED\r\n')
         except (ValueError, asyncio.exceptions.IncompleteReadError):
             writer.write(b'CLIENT_ERROR\r\n')
+
+    async def handle_increment(self, command_parts, writer):
+        key = command_parts[1]
+        if key not in self.cache:
+            writer.write(b'NOT_FOUND\r\n')
+            return
+
+        try:
+            delta = int(command_parts[2])
+            current_value = self.cache.get(key, {'value': 0})  # Get the current value or 0 if not found
+            value = int(current_value['value'].decode()) # Decode the value into a int
+            if isinstance(value, int):
+                new_value = value + delta
+                self.cache[key] = {'value': new_value, 'cas_unique': str(uuid.uuid4())}  # Update cache with new value and new CAS identifier
+                writer.write(f'{new_value}\r\n'.encode())
+            else:
+                writer.write(b'CLIENT_ERROR\r\n')  # Value is not an integer
+        except ValueError:
+            writer.write(b'CLIENT_ERROR\r\n')  # Delta is not a valid integer
+
 
 
 
