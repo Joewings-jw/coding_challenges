@@ -3,6 +3,38 @@ import argparse
 import uuid
 
 class MemcachedServer:
+
+    """
+    Memcached Server
+
+    A simple Memcached server implementation using asyncio in Python.
+
+    The server listens for incoming connections from clients and handles various Memcached commands,
+    including SET, GET, ADD, REPLACE, APPEND, PREPEND, CAS (compare-and-swap), INCREMENT, and DECREMENT.
+
+    Supported commands:
+    - SET: Store data in the cache.
+    - GET: Retrieve data from the cache.
+    - ADD: Store data only if the key does not already exist.
+    - REPLACE: Store data only if the key already exists.
+    - APPEND: Append data to an existing key's value.
+    - PREPEND: Prepend data to an existing key's value.
+    - CAS: Compare and swap data based on a unique identifier.
+    - INC: Increment the value of a numeric key.
+    - DEC: Decrement the value of a numeric key.
+
+    Usage:
+    The server can be started with the specified port number and maximum cache size (optional).
+
+    Example:
+    python memcached_server.py -p 11211 -s 10000
+
+    Arguments:
+        -p, --port: Port number to run the server on (default: 11211).
+        -s, --max-cache-size: Maximum cache size in bytes (default: unlimited).
+
+    """
+
     def __init__(self, port, max_cache_size=None):
         self.port = port
         self.max_cache_size = max_cache_size
